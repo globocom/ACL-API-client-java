@@ -2,12 +2,14 @@ package com.globo.aclapi.client;
 
 import com.globo.aclapi.client.model.AclAPIRoot;
 import com.globo.aclapi.client.model.ErrorMessage;
+import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseInterceptor;
 import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
+import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -38,6 +40,8 @@ public abstract class AbstractAPI<T> {
     }
 
     protected AclAPI getAclAPI() { return this.aclAPI; }
+
+    protected abstract Type getType();
 
     protected HttpRequestFactory buildHttpRequestFactory() {
         HttpRequestFactory request = this.getAclAPI().getHttpTransport().createRequestFactory(new HttpRequestInitializer() {
@@ -75,7 +79,7 @@ public abstract class AbstractAPI<T> {
     protected void interceptRequest(HttpRequest request) { insertAuthenticationHeaders(request); }
 
     protected void insertAuthenticationHeaders(HttpRequest request) {
-        request.getHeaders().setBasicAuthentication(aclAPI.getUsername(), aclAPI.getPassword());
+        request.getHeaders().setBasicAuthentication(this.aclAPI.getUsername(), this.aclAPI.getPassword());
     }
 
     protected void interceptResponse(HttpResponse response) throws AclAPIException, IOException {
@@ -129,6 +133,60 @@ public abstract class AbstractAPI<T> {
             return aclAPIRoot;
         } catch (IOException e) {
             throw new AclAPIException("IO Error when parsing response: " + e.getMessage(), e);
+        }
+    }
+
+    protected GenericUrl buildUrl(String suffixUrl) { return new GenericUrl(this.aclAPI.getBaseUrl() + suffixUrl); }
+
+    protected AclAPIRoot<T> get(String suffixUrl) throws AclAPIException {
+        try {
+            GenericUrl url = this.buildUrl(suffixUrl);
+            HttpRequest request = this.requestFactory.buildGetRequest(url);
+            HttpResponse response = request.execute();
+            return this.parse(response.parseAsString(), getType());
+        } catch (IOException e) {
+            throw new AclAPIException("IO Error during GET request: " + e, e);
+        }
+    }
+
+    protected AclAPIRoot<T> post(String suffixUrl, Object payload) throws AclAPIException {
+        try {
+            GenericUrl url = this.buildUrl(suffixUrl);
+            JsonHttpContent content = null;
+            if (payload != null) {
+                content = new JsonHttpContent(JSON_FACTORY, payload);
+            }
+            HttpRequest request = this.requestFactory.buildPostRequest(url, content);
+            HttpResponse response = request.execute();
+            return this.parse(response.parseAsString(), getType());
+        } catch (IOException e) {
+            throw new AclAPIException("IO Error during POST request: " + e, e);
+        }
+    }
+
+    protected AclAPIRoot<T> put(String suffixUrl, Object payload) throws AclAPIException {
+        try {
+            GenericUrl url = this.buildUrl(suffixUrl);
+            JsonHttpContent content = null;
+            if (payload != null) {
+                content = new JsonHttpContent(JSON_FACTORY, payload);
+            }
+            HttpRequest request = this.requestFactory.buildPutRequest(url, content);
+            HttpResponse response = request.execute();
+            return this.parse(response.parseAsString(), getType());
+        } catch (IOException e) {
+            throw new AclAPIException("IO Error during PUT request: " + e, e);
+        }
+    }
+
+    protected AclAPIRoot<T> delete(String suffixUrl) throws AclAPIException {
+        try {
+            GenericUrl url = this.buildUrl(suffixUrl);
+            HttpRequest request = this.requestFactory.buildDeleteRequest(url);
+            HttpResponse response = request.execute();
+            return this.parse(response.parseAsString(), getType());
+        } catch (IOException e) {
+            throw new AclAPIException("IO Error during DELETE request: " + e, e);
         }
     }
 }
