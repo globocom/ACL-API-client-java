@@ -1,0 +1,43 @@
+{
+  "rules": [
+    {
+      "id": "1",
+      "protocol": "tcp",
+      "action": "permit",
+      "l4-options": {
+        "dest-port-start": "636",
+        "dest-port-op": "eq"
+      },
+      "source": "0.0.0.0/0",
+      "destination": "10.70.1.80/32"
+    },
+    {
+      "id": "2",
+      "protocol": "udp",
+      "action": "permit",
+      "l4-options": {
+        "src-port-op": "eq",
+        "dest-port-op": "eq",
+        "src-port-start": "1111",
+        "dest-port-start": "1985"
+      },
+      "source": "200.0.0.0/0",
+      "destination": "224.0.0.102/32"
+    },
+    {
+      "id": "3",
+      "protocol": "ip",
+      "action": "permit",
+      "source": "0.0.0.0/0",
+      "destination": "10.10.5.0/24"
+    },
+    {
+      "source": "0.0.0.0/0",
+      "destination": "10.70.130.50/32",
+      "id": "59",
+      "protocol": "ip",
+      "action": "permit"
+    }
+  ],
+  "kind": "default#acl"
+}

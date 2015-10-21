@@ -1,0 +1,32 @@
+{
+  "envs": [
+    {
+      "id_environment": "12",
+      "environment": "139",
+      "name": "ENV_A",
+      "supernet": "1",
+      "supernet_vlan": "250",
+      "auto_vlan": "1",
+      "ip_version": "ipv4"
+    },
+    {
+      "supernet": "1",
+      "name": "ENV_B",
+      "supernet_vlan": "250",
+      "auto_vlan": "1",
+      "id_environment": "13",
+      "environment": "122",
+      "ip_version": "ipv4"
+    },
+    {
+      "supernet": "1",
+      "name": "ENV_C",
+      "supernet_vlan": "249",
+      "auto_vlan": "1",
+      "id_environment": "14",
+      "environment": "123",
+      "ip_version": "ipv6"
+    }
+  ],
+  "kind": "object#env"
+}

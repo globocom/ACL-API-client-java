@@ -131,12 +131,12 @@
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client</artifactId>
-            <version>1.17.0-rc</version>
+            <version>1.20.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-jackson2</artifactId>
-            <version>1.17.0-rc</version>
+            <version>1.20.0</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -155,5 +155,10 @@
             <version>1.7.5</version>
             <optional>true</optional>
         </dependency>
+        <dependency>
+        <groupId>net.oauth.core</groupId>
+        <artifactId>oauth-core-parent</artifactId>
+        <version>20090531</version>
+    </dependency>
     </dependencies>
 </project>
