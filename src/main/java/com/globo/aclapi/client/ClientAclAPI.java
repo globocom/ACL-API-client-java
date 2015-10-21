@@ -16,8 +16,11 @@
 */
 package com.globo.aclapi.client;
 
+import com.globo.aclapi.client.api.JobAPI;
 import com.globo.aclapi.client.api.RuleAPI;
 import com.globo.aclapi.client.api.EnvAPI;
+import com.globo.aclapi.client.oauth.BearerAuthSchemeFactory;
+import com.globo.aclapi.client.oauth.TokenCredentials;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import java.security.cert.CertificateException;
@@ -25,13 +28,19 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import org.apache.http.auth.AuthSchemeRegistry;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRouteBean;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.conn.ProxySelectorRoutePlanner;
@@ -39,6 +48,7 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,6 +142,7 @@ public class ClientAclAPI {
     private static HttpParams getHttpParams() {
         HttpParams params = new BasicHttpParams();
         HttpConnectionParams.setSocketBufferSize(params, 8192);
+        HttpConnectionParams.setConnectionTimeout(params, 5000);
         ConnManagerParams.setMaxTotalConnections(params, 200);
         ConnManagerParams.setMaxConnectionsPerRoute(params, new ConnPerRouteBean(20));
         return params;
@@ -141,10 +152,31 @@ public class ClientAclAPI {
         SchemeRegistry registry = new SchemeRegistry();
         registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
         registry.register(new Scheme("https", socketFactory, 443));
+
         ClientConnectionManager connectionManager = new ThreadSafeClientConnManager(params, registry);
-        DefaultHttpClient httpClient = new DefaultHttpClient(connectionManager, params);
+
+
+        DefaultHttpClient httpClient = new DefaultHttpClient(connectionManager, params) {
+            @Override
+            protected HttpContext createHttpContext() {
+                HttpContext httpContext = super.createHttpContext();
+                AuthSchemeRegistry authSchemeRegistry = new AuthSchemeRegistry();
+                authSchemeRegistry.register("Bearer", new BearerAuthSchemeFactory());
+                httpContext.setAttribute(ClientContext.AUTHSCHEME_REGISTRY, authSchemeRegistry);
+                AuthScope sessionScope = new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, AuthScope.ANY_REALM, "Bearer");
+
+                Credentials credentials = new TokenCredentials("");
+                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(sessionScope, credentials);
+                httpContext.setAttribute(ClientContext.CREDS_PROVIDER, credentialsProvider);
+                return httpContext;
+            }
+        };
         httpClient.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
         httpClient.setRoutePlanner(new ProxySelectorRoutePlanner(registry, proxySelector));
+
+
+
         return httpClient;
     }
 
@@ -155,5 +187,9 @@ public class ClientAclAPI {
 
     public RuleAPI getAclAPI() {
         return new RuleAPI(this);
+    }
+
+    public JobAPI getJobAPI() {
+        return new JobAPI(this);
     }
 }

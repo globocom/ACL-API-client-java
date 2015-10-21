@@ -143,6 +143,25 @@ public class Rule extends GenericJson {
             this.rules = rules;
         }
     }
+    public static class RuleSaveResponse extends GenericJson {
+        @Key("jobs")
+        private List<Long> jobId;
+
+        @Key("id")
+        private List<Long> ids;
+
+        public Long getFirstRuleId() {
+            return ids.get(0);
+        }
+
+        public List<Long> getIds() {
+            return ids;
+        }
+
+        public Long getJobId() {
+            return jobId.get(0);
+        }
+    }
 
     public static class RuleRequest extends GenericJson {
 

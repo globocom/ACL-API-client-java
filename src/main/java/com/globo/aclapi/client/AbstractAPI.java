@@ -100,7 +100,7 @@ public abstract class AbstractAPI<T> {
     protected void interceptRequest(HttpRequest request) { insertAuthenticationHeaders(request); }
 
     protected void insertAuthenticationHeaders(HttpRequest request) {
-        if ( this.clientAclAPI.getToken() != null ){
+        if ( this.clientAclAPI.getToken() != null && !this.clientAclAPI.getToken().isEmpty() ){
             request.getHeaders().setAuthorization("Bearer " + this.clientAclAPI.getToken());
         } else {
             request.getHeaders().setBasicAuthentication(this.clientAclAPI.getUsername(), this.clientAclAPI.getPassword());
@@ -127,7 +127,7 @@ public abstract class AbstractAPI<T> {
             AclAPIRoot<ErrorMessage> responseObj = this.parse(responseAsString, ErrorMessage.class);
             ErrorMessage errorMsg = responseObj.getFirstObject();
             if (errorMsg != null && errorMsg.getCode() != null && errorMsg.getMsg() != null) {
-                throw new AclAPIException(errorMsg.getCode() + " - " + errorMsg.getMsg());
+                throw new AclErrorCodeAPIException(errorMsg.getCode(), errorMsg.getMsg());
             } else {
                 throw new AclAPIException(responseAsString);
             }

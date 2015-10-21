@@ -18,7 +18,9 @@ package com.globo.aclapi.client.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.globo.aclapi.client.AbstractAPI;
+import com.globo.aclapi.client.AclErrorCodeAPIException;
 import com.globo.aclapi.client.ClientAclAPI;
+import com.globo.aclapi.client.model.Job;
 import com.globo.aclapi.client.model.Rule;
 import com.google.api.client.json.GenericJson;
 import java.lang.reflect.Type;
@@ -42,13 +44,53 @@ public class RuleAPI extends AbstractAPI<Rule> {
     }
 
 
-    public void save(Long envId, Rule rule) {
+    public Rule.RuleSaveResponse save(Long envId, Rule rule) {
         Rule.RuleRequest request = new Rule.RuleRequest();
         request.addRule(rule);
-        GenericJson result = this.put("/api/ipv4/acl/" + envId, request, GenericJson.class);
 
-        System.out.println(result);
+        Rule.RuleSaveResponse result = this.put("/api/ipv4/acl/" + envId, request, Rule.RuleSaveResponse.class);
+        rule.setId(result.getFirstRuleId().toString());
+
+        return result;
     }
 
+    /**
+     * save the rule in ACL-API and force run the job, if the job fails, remove the rule and throw exception with jobs message
+     * @param envId
+     * @param numVlan
+     * @param rule
+     * @return
+     */
+    public Rule saveSync(Long envId, Long numVlan, Rule rule) {
+        Rule.RuleSaveResponse result = save(envId, numVlan, rule);
+
+        JobAPI jobApi = this.getClientAclAPI().getJobAPI();
+        Job job = jobApi.get(result.getJobId());
+
+        Job.Status statusJob = job.getStatus();
+        if (statusJob.equals(Job.Status.PENDING)){
+            try {
+                jobApi.run(result.getJobId());
+            } catch (AclErrorCodeAPIException ex) {
+                remove(envId, numVlan, result.getFirstRuleId());
+                throw ex;
+            }
+        }
+
+        return rule;
+    }
+
+    public void remove(Long envId, Long numVlan, Long ruleId) {
+        this.delete("/api/ipv4/acl/" + envId + "/" + numVlan + "/" + ruleId);
+    }
+
+    public Rule.RuleSaveResponse save(Long envId, Long numVlan, Rule rule){
+        Rule.RuleRequest request = new Rule.RuleRequest();
+        request.addRule(rule);
+
+        Rule.RuleSaveResponse result = this.put("/api/ipv4/acl/" + envId + "/" + numVlan, request, Rule.RuleSaveResponse.class);
+
+        return result;
+    }
 
 }

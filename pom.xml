@@ -160,5 +160,10 @@
         <artifactId>oauth-core-parent</artifactId>
         <version>20090531</version>
     </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2.3</version>
+        </dependency>
     </dependencies>
 </project>

@@ -4,11 +4,11 @@ import com.google.api.client.util.Key;
 
 public class ErrorMessage {
     @Key("code")
-    private Integer code;
+    private String code;
 
     @Key("message")
     private String msg;
 
-    public Integer getCode() { return code; }
+    public String getCode() { return code; }
     public String getMsg() { return msg; }
 }
