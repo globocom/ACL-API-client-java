@@ -245,6 +245,16 @@ public abstract class AbstractAPI<T> {
             throw new AclAPIException("IO Error during DELETE request: " + e, e);
         }
     }
+    protected <T extends GenericJson> T delete(String suffixUrl, Class<T> type) throws AclAPIException {
+        try {
+            GenericUrl url = this.buildUrl(suffixUrl);
+            HttpRequest request = this.requestFactory.buildDeleteRequest(url);
+            HttpResponse response = request.execute();
+            return this.parse(response.parseAsString(), type);
+        } catch (IOException e) {
+            throw new AclAPIException("IO Error during DELETE request: " + e, e);
+        }
+    }
 
     public <T extends GenericJson> T get(String suffixUrl, Class<T> type) {
         try {
@@ -268,5 +278,9 @@ public abstract class AbstractAPI<T> {
 
         com.google.api.client.json.JsonFactory jsonFactory = new JacksonFactory();
         return new JsonObjectParser(jsonFactory).parseAndClose(stream, DEFAULT_CHARSET, dataType);
+    }
+
+    public String getUserCredentials() {
+        return ". Token: " + this.getClientAclAPI().getToken() + ", User: " + this.getClientAclAPI().getUsername();
     }
 }

@@ -1,15 +1,38 @@
 package com.globo.aclapi.client.api;
 
 import com.globo.aclapi.client.AbstractAPI;
+import com.globo.aclapi.client.MockGloboACL;
 import com.globo.aclapi.client.TestUtil;
 import com.globo.aclapi.client.model.L4Option;
 import com.globo.aclapi.client.model.Rule;
 import java.util.List;
 import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 public class RuleAPITest extends TestCase {
 
+    MockGloboACL globoAcl;
+    private RuleAPI ruleAPI;
 
+
+    @Before
+    public void setUp(){
+        this.globoAcl = new MockGloboACL("token_123");
+        this.ruleAPI = this.globoAcl.getAclAPI();
+    }
+
+    @Test
+    public void testListByEnv() throws Exception {
+        String result = TestUtil.getSample("rule_list_by_env.json");
+        this.globoAcl.registerFakeRequest(MockGloboACL.HttpMethod.GET, "/api/ipv4/acl/" + 123l, result);
+
+        List<Rule> rules = this.ruleAPI.listByEnv(123l);
+        assertEquals(4, rules.size());
+    }
+
+
+    @Test
     public void testListACLEnv() throws Exception {
         String result = TestUtil.getSample("rule_list_by_env.json");
 
@@ -55,5 +78,31 @@ public class RuleAPITest extends TestCase {
         assertEquals("0.0.0.0/0", rule.getSource());
         assertEquals("10.10.5.0/24", rule.getDestination());
 
+    }
+
+    @Test
+    public void testSaveByEnv() throws Exception {
+        String result = TestUtil.getSample("rule_saveByEnv_response.json");
+        this.globoAcl.registerFakeRequest(MockGloboACL.HttpMethod.PUT, "/api/ipv4/acl/" + 123l, result);
+
+        Rule rule = new Rule();
+
+        Rule.RuleSaveResponse response = this.ruleAPI.save(123l, rule);
+
+        assertEquals((Long)1242l, response.getFirstRuleId());
+        assertEquals((Long)373l, response.getJobId());
+
+    }
+
+    public void testSaveByEnvAndNumVlan() throws Exception {
+        String result = TestUtil.getSample("rule_saveByEnvNumVlan_response.json");
+        this.globoAcl.registerFakeRequest(MockGloboACL.HttpMethod.PUT, "/api/ipv4/acl/" + 123l + "/" + 97, result);
+
+        Rule rule = new Rule();
+
+        Rule.RuleSaveResponse response = this.ruleAPI.save(123l, 97l, rule);
+
+        assertEquals((Long)1241l, response.getFirstRuleId());
+        assertEquals((Long)372l, response.getJobId());
     }
 }

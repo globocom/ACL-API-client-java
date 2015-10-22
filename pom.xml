@@ -156,10 +156,10 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-        <groupId>net.oauth.core</groupId>
-        <artifactId>oauth-core-parent</artifactId>
-        <version>20090531</version>
-    </dependency>
+            <groupId>com.newrelic.agent.java</groupId>
+            <artifactId>newrelic-api</artifactId>
+            <version>3.18.0</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>

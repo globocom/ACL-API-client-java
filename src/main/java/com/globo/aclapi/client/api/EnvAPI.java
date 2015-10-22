@@ -21,6 +21,8 @@ import com.globo.aclapi.client.AbstractAPI;
 import com.globo.aclapi.client.ClientAclAPI;
 import com.globo.aclapi.client.model.Environment;
 
+import com.newrelic.api.agent.NewRelic;
+import com.newrelic.api.agent.Trace;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -35,7 +37,10 @@ public class EnvAPI extends AbstractAPI<Environment>{
         return new TypeReference<Environment>() {}.getType();
     }
 
+    @Trace(dispatcher = true)
     public List<Environment> list() {
+        NewRelic.setTransactionName(null, "/globoACL/env/list");
+
         Environment.EnvironmentResponse envList = this.get("/api/ipv4/env", Environment.EnvironmentResponse.class);
 
         return envList.getEnvs();

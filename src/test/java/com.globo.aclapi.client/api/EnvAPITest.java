@@ -1,9 +1,11 @@
 package com.globo.aclapi.client.api;
 
 import com.globo.aclapi.client.AbstractAPI;
+import com.globo.aclapi.client.MockGloboACL;
 import com.globo.aclapi.client.TestUtil;
 import com.globo.aclapi.client.model.Environment;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -11,8 +13,22 @@ import static org.junit.Assert.assertTrue;
 
 public class EnvAPITest {
 
+    MockGloboACL globoAcl;
+    private EnvAPI envAPI;
 
+    @Before
+    public void setUp(){
+        this.globoAcl = new MockGloboACL("token_123");
+        this.envAPI = this.globoAcl.getEnvAPI();
+    }
+    public void testListRequest() throws Exception {
+        String result = TestUtil.getSample("env_list.json");
+        this.globoAcl.registerFakeRequest(MockGloboACL.HttpMethod.GET, "/api/ipv4/env/" + 123l, result);
 
+        List<Environment> list = this.envAPI.list();
+        assertEquals(3, list.size());
+
+    }
 
     @Test
     public void testList() throws Exception {
