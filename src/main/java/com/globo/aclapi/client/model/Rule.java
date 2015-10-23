@@ -38,6 +38,9 @@ public class Rule extends GenericJson {
     @Key("destination")
     private String destination;
 
+    @Key("icmp-options")
+    private ICMPOption icmpOptions;
+
     @Key("l4-options")
     private L4Option l4Options;
 
@@ -93,6 +96,13 @@ public class Rule extends GenericJson {
         this.protocol = protocol.apiCode;
     }
 
+    public ICMPOption getIcmpOptions() {
+        return icmpOptions;
+    }
+
+    public void setIcmpOptions(ICMPOption icmpOptions) {
+        this.icmpOptions = icmpOptions;
+    }
 
     public enum Action {
         PERMIT("permit");
@@ -114,6 +124,7 @@ public class Rule extends GenericJson {
     public enum Protocol {
         TCP("tcp"),
         UDP("udp"),
+        ICMP("icmp"),
         IP("ip");
 
         private String apiCode;
