@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Rule extends GenericJson {
 
@@ -104,6 +105,26 @@ public class Rule extends GenericJson {
         this.icmpOptions = icmpOptions;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Rule rule = (Rule) o;
+        return Objects.equals(protocol, rule.protocol) &&
+                Objects.equals(action, rule.action) &&
+                Objects.equals(source, rule.source) &&
+                Objects.equals(destination, rule.destination) &&
+                Objects.equals(icmpOptions, rule.icmpOptions) &&
+                Objects.equals(l4Options, rule.l4Options);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), protocol, action, source, destination, icmpOptions, l4Options);
+    }
+
     public enum Action {
         PERMIT("permit");
         private String apiCode;
@@ -124,8 +145,8 @@ public class Rule extends GenericJson {
     public enum Protocol {
         TCP("tcp"),
         UDP("udp"),
-        ICMP("icmp"),
-        IP("ip");
+        IP("ip"),
+        ICMP("icmp");
 
         private String apiCode;
         private Protocol(String apiCode) {

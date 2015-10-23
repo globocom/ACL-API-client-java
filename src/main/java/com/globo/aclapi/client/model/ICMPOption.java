@@ -20,37 +20,20 @@ public class ICMPOption extends GenericJson{
         this.code = code.toString();
     }
 
-//
-//    public Integer getType() {
-//        return type;
-//    }
-//
-//    public void setType(Integer type) {
-//        this.type = type;
-//    }
-//
-//    public Integer getCode() {
-//        return code;
-//    }
-//
-//    public void setCode(Integer code) {
-//        this.code = code;
-//    }
 
-
-    public String getType() {
-        return type;
+    public Integer getType() {
+        return (type != null ? Integer.valueOf(type) : null);
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setType(Integer type) {
+        this.type = type != null ? type.toString() : null;
     }
 
-    public String getCode() {
-        return code;
+    public Integer getCode() {
+        return (code != null ? Integer.valueOf(code) : null);
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setCode(Integer code) {
+        this.code = code != null ? code.toString() : null;
     }
 }

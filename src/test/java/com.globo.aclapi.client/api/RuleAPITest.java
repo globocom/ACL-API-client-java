@@ -134,8 +134,8 @@ public class RuleAPITest extends TestCase {
         assertEquals("10.170.0.80/28", rule.getSource());
         assertEquals("10.170.0.83/32", rule.getDestination());
         ICMPOption icmpOptions = rule.getIcmpOptions();
-        assertEquals("8", icmpOptions.getType());
-        assertEquals("3", icmpOptions.getCode());
+        assertEquals((Integer)8, icmpOptions.getType());
+        assertEquals((Integer)3, icmpOptions.getCode());
     }
 
 

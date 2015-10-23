@@ -50,8 +50,5 @@ public class JobAPITest {
 
         assertEquals(Arrays.asList(new BigDecimal(357l)), job.get("ids"));
     }
-
-
-
 }
 

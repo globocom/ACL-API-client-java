@@ -2,6 +2,7 @@ package com.globo.aclapi.client.model;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import java.util.Objects;
 
 public class L4Option extends GenericJson{
 
@@ -61,5 +62,23 @@ public class L4Option extends GenericJson{
 
     public void setDestPortEnd(Integer destPortEnd) {
         this.destPortEnd = destPortEnd != null ? destPortEnd.toString() : null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        L4Option l4Option = (L4Option) o;
+        return Objects.equals(srcPortOperation, l4Option.srcPortOperation) &&
+                Objects.equals(destPortOperation, l4Option.destPortOperation) &&
+                Objects.equals(srcPortStart, l4Option.srcPortStart) &&
+                Objects.equals(destPortStart, l4Option.destPortStart) &&
+                Objects.equals(destPortEnd, l4Option.destPortEnd);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), srcPortOperation, destPortOperation, srcPortStart, destPortStart, destPortEnd);
     }
 }
