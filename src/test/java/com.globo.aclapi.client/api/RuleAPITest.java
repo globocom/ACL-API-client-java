@@ -3,8 +3,10 @@ package com.globo.aclapi.client.api;
 import com.globo.aclapi.client.AbstractAPI;
 import com.globo.aclapi.client.MockGloboACL;
 import com.globo.aclapi.client.TestUtil;
+import com.globo.aclapi.client.model.ICMPOption;
 import com.globo.aclapi.client.model.L4Option;
 import com.globo.aclapi.client.model.Rule;
+import java.io.IOException;
 import java.util.List;
 import junit.framework.TestCase;
 import org.junit.Before;
@@ -23,7 +25,7 @@ public class RuleAPITest extends TestCase {
     }
 
     @Test
-    public void testListByEnv() throws Exception {
+    public void testListByEnv()  {
         String result = TestUtil.getSample("rule_list_by_env.json");
         this.globoAcl.registerFakeRequest(MockGloboACL.HttpMethod.GET, "/api/ipv4/acl/" + 123l, result);
 
@@ -33,7 +35,7 @@ public class RuleAPITest extends TestCase {
 
 
     @Test
-    public void testListACLEnv() throws Exception {
+    public void testListACLEnv() throws IOException {
         String result = TestUtil.getSample("rule_list_by_env.json");
 
         Rule.RuleResponse response = AbstractAPI.parse(result, Rule.RuleResponse.class);
@@ -81,7 +83,7 @@ public class RuleAPITest extends TestCase {
     }
 
     @Test
-    public void testSaveByEnv() throws Exception {
+    public void testSaveByEnv() {
         String result = TestUtil.getSample("rule_saveByEnv_response.json");
         this.globoAcl.registerFakeRequest(MockGloboACL.HttpMethod.PUT, "/api/ipv4/acl/" + 123l, result);
 
@@ -94,7 +96,8 @@ public class RuleAPITest extends TestCase {
 
     }
 
-    public void testSaveByEnvAndNumVlan() throws Exception {
+    @Test
+    public void testSaveByEnvAndNumVlan() {
         String result = TestUtil.getSample("rule_saveByEnvNumVlan_response.json");
         this.globoAcl.registerFakeRequest(MockGloboACL.HttpMethod.PUT, "/api/ipv4/acl/" + 123l + "/" + 97, result);
 
@@ -105,4 +108,35 @@ public class RuleAPITest extends TestCase {
         assertEquals((Long)1241l, response.getFirstRuleId());
         assertEquals((Long)372l, response.getJobId());
     }
+
+    @Test
+    public void testListByEnvAndNumVlan() {
+        String result = TestUtil.getSample("rule_listByEnvAndNumVlan_ok_response.json");
+        this.globoAcl.registerFakeRequest(MockGloboACL.HttpMethod.GET, "/api/ipv4/acl/" + 123l + "/" + 97, result);
+
+        List<Rule> list = this.ruleAPI.listByEnvAndNumVlan(123l, 97l);
+
+        assertEquals(3, list.size());
+
+        Rule rule = list.get(0);
+        assertEquals(Rule.Protocol.TCP, rule.getProtocol());
+        assertEquals("10.170.0.80/28", rule.getSource());
+        assertEquals("10.170.0.86/32", rule.getDestination());
+
+
+        rule = list.get(1);
+        assertEquals(Rule.Protocol.UDP, rule.getProtocol());
+        assertEquals("10.170.0.80/28", rule.getSource());
+        assertEquals("10.170.0.83/32", rule.getDestination());
+
+        rule = list.get(2);
+        assertEquals(Rule.Protocol.ICMP, rule.getProtocol());
+        assertEquals("10.170.0.80/28", rule.getSource());
+        assertEquals("10.170.0.83/32", rule.getDestination());
+        ICMPOption icmpOptions = rule.getIcmpOptions();
+        assertEquals("8", icmpOptions.getType());
+        assertEquals("3", icmpOptions.getCode());
+    }
+
+
 }

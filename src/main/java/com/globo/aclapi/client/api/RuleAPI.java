@@ -145,4 +145,12 @@ public class RuleAPI extends AbstractAPI<Rule> {
         jobAPI.run(jobId);
 
     }
+
+    public List<Rule> listByEnvAndNumVlan(Long envId, Long numVlan) {
+        NewRelic.setTransactionName(null, "/globoACL/rule/listByEnvIdAndNumVlan");
+
+        Rule.RuleResponse aclResponse = this.get("/api/ipv4/acl/" + envId + "/" + numVlan, Rule.RuleResponse.class);
+
+        return aclResponse.getRules();
+    }
 }

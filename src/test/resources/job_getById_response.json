@@ -1,0 +1,15 @@
+{
+  "kind": "object#job",
+  "jobs": {
+    "status": "ERROR",
+    "finish_timestamp": "2015-10-22 19:30:09",
+    "num_vlan": "97",
+    "id_job": "357",
+    "environment": "120",
+    "ip_version": "ipv4",
+    "result": "success",
+    "owner": "user_123",
+    "init_timestamp": "2015-10-22 19:30:08",
+    "create_timestamp": "2015-10-21 17:40:02"
+  }
+}

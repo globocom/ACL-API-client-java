@@ -7,21 +7,22 @@ import java.io.InputStreamReader;
 public class TestUtil {
 
     // @param path - after test/resources
-    public static String getSample(String path) throws Exception{
-        InputStream in = TestUtil.class.getClassLoader().getResourceAsStream(path);
+    public static String getSample(String path) {
+        try {
+            InputStream in = TestUtil.class.getClassLoader().getResourceAsStream(path);
 
-        InputStreamReader is = new InputStreamReader(in);
-        StringBuilder sb=new StringBuilder();
-        BufferedReader br = new BufferedReader(is);
-        String read = br.readLine();
+            InputStreamReader is = new InputStreamReader(in);
+            StringBuilder sb = new StringBuilder();
+            BufferedReader br = new BufferedReader(is);
+            String read = br.readLine();
 
-        while(read != null) {
-            //System.out.println(read);
-            sb.append(read);
-            read =br.readLine();
-
+            while (read != null) {
+                sb.append(read);
+                read = br.readLine();
+            }
+            return sb.toString();
+        }catch (Exception e) {
+            throw new RuntimeException("Error try to get file content: " + path, e);
         }
-
-        return sb.toString();
     }
 }
