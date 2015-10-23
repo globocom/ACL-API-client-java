@@ -17,6 +17,11 @@ public class L4Option extends GenericJson{
     @Key("dest-port-start")
     private String destPortStart;
 
+    @Key("dest-port-end")
+    private String destPortEnd;
+
+
+
 
     public String getSrcPortOperation() {
         return srcPortOperation;
@@ -48,5 +53,13 @@ public class L4Option extends GenericJson{
 
     public void setDestPortStart(Integer destPortStart) {
         this.destPortStart = destPortStart != null ? destPortStart.toString() : null;
+    }
+
+    public Integer getDestPortEnd() {
+        return (destPortEnd != null ? Integer.valueOf(destPortEnd) : null);
+    }
+
+    public void setDestPortEnd(Integer destPortEnd) {
+        this.destPortEnd = destPortEnd != null ? destPortEnd.toString() : null;
     }
 }

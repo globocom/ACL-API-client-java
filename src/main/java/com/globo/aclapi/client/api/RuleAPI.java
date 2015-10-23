@@ -26,6 +26,7 @@ import com.google.api.client.json.GenericJson;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Trace;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,7 +130,7 @@ public class RuleAPI extends AbstractAPI<Rule> {
 
         GenericJson result = this.delete("/api/ipv4/acl/" + envId + "/" + numVlan + "/" + ruleId, GenericJson.class);
 
-        return (Long)result.get("job");
+        return ((BigDecimal)result.get("job")).longValue();
     }
 
     @Trace(dispatcher = true)
