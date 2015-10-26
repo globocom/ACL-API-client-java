@@ -54,6 +54,44 @@ public class RuleTest  {
     }
 
 
+    //
+    @Test
+    public void testEquals_with_id() {
+        Rule rule = new Rule();
+        rule.setId("23321");
+        rule.setAction(Rule.Action.PERMIT);
+        rule.setProtocol(Rule.Protocol.TCP);
+        rule.setSource("10.0.0.0/32");
+        rule.setDestination("10.0.0.2/28");
+
+        L4Option l4Options = new L4Option();
+        rule.setL4Options(l4Options);
+        l4Options.setDestPortOperation("range");
+        l4Options.setDestPortStart(80);
+        l4Options.setDestPortEnd(90);
+
+        l4Options.setSrcPortOperation("eq");
+        l4Options.setSrcPortStart(999);
+
+
+        Rule rule2 = new Rule();
+        rule2.setAction(Rule.Action.PERMIT);
+        rule2.setProtocol(Rule.Protocol.TCP);
+        rule2.setSource("10.0.0.0/32");
+        rule2.setDestination("10.0.0.2/28");
+
+        L4Option l4Options2 = new L4Option();
+        rule2.setL4Options(l4Options2);
+        l4Options2.setDestPortOperation("range");
+        l4Options2.setDestPortStart(80);
+        l4Options2.setDestPortEnd(90);
+
+        l4Options2.setSrcPortOperation("eq");
+        l4Options2.setSrcPortStart(999);
+
+        assertEquals(rule, rule2);
+    }
+
     @Test
     public void testEquals_icmp() {
         Rule rule = new Rule();

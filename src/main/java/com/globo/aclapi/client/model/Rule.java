@@ -110,7 +110,7 @@ public class Rule extends GenericJson {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+
         Rule rule = (Rule) o;
         return Objects.equals(protocol, rule.protocol) &&
                 Objects.equals(action, rule.action) &&
