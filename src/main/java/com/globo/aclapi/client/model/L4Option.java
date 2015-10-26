@@ -68,7 +68,7 @@ public class L4Option extends GenericJson{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+
         L4Option l4Option = (L4Option) o;
         return Objects.equals(srcPortOperation, l4Option.srcPortOperation) &&
                 Objects.equals(destPortOperation, l4Option.destPortOperation) &&

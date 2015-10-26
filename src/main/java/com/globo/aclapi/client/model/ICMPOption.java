@@ -42,7 +42,7 @@ public class ICMPOption extends GenericJson{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+
         ICMPOption that = (ICMPOption) o;
         return Objects.equals(type, that.type) &&
                 Objects.equals(code, that.code);
