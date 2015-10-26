@@ -2,6 +2,7 @@ package com.globo.aclapi.client.model;
 
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import java.util.Objects;
 
 public class ICMPOption extends GenericJson{
 
@@ -35,5 +36,20 @@ public class ICMPOption extends GenericJson{
 
     public void setCode(Integer code) {
         this.code = code != null ? code.toString() : null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ICMPOption that = (ICMPOption) o;
+        return Objects.equals(type, that.type) &&
+                Objects.equals(code, that.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), type, code);
     }
 }

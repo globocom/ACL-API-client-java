@@ -78,6 +78,29 @@ public class RuleTest  {
     }
 
     @Test
+    public void testEquals_icmp_fail() {
+        Rule rule = new Rule();
+        rule.setAction(Rule.Action.PERMIT);
+        rule.setProtocol(Rule.Protocol.TCP);
+        rule.setSource("10.0.0.0/32");
+        rule.setDestination("10.0.0.2/28");
+
+        ICMPOption icmpOption = new ICMPOption(7, 10);
+        rule.setIcmpOptions(icmpOption);
+
+        Rule rule2 = new Rule();
+        rule2.setAction(Rule.Action.PERMIT);
+        rule2.setProtocol(Rule.Protocol.TCP);
+        rule2.setSource("10.0.0.0/32");
+        rule2.setDestination("10.0.0.2/28");
+
+        ICMPOption icmpOption2 = new ICMPOption(8, 11);
+        rule2.setIcmpOptions(icmpOption2);
+
+        assertNotEquals(rule, rule2);
+    }
+
+    @Test
     public void testEquals_fail() {
         Rule rule = new Rule();
         rule.setAction(Rule.Action.PERMIT);
@@ -111,6 +134,7 @@ public class RuleTest  {
         rule2.setIcmpOptions(new ICMPOption(8,10));
 
         assertNotEquals(rule, rule2);
+
     }
 
 }
