@@ -19,6 +19,7 @@ package com.globo.aclapi.client;
 import com.globo.aclapi.client.model.AclAPIRoot;
 import com.globo.aclapi.client.model.ErrorMessage;
 import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -41,8 +42,10 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractAPI<T> {
+
     static final Logger LOGGER = LoggerFactory.getLogger(AbstractAPI.class);
     static final JsonFactory JSON_FACTORY = new JacksonFactory();
     static final JsonObjectParser parser = new JsonObjectParser(JSON_FACTORY);
@@ -65,7 +68,7 @@ public abstract class AbstractAPI<T> {
     protected abstract Type getType();
 
     protected HttpRequestFactory buildHttpRequestFactory() {
-        HttpRequestFactory request = this.getClientAclAPI().getHttpTransport().createRequestFactory(new HttpRequestInitializer() {
+        return this.getClientAclAPI().getHttpTransport().createRequestFactory(new HttpRequestInitializer() {
             @Override
             public void initialize(HttpRequest request) throws IOException {
                 request.setNumberOfRetries(1);
@@ -94,7 +97,6 @@ public abstract class AbstractAPI<T> {
                 interceptRequest(request);
             }
         });
-        return request;
     }
 
     protected void interceptRequest(HttpRequest request) { insertAuthenticationHeaders(request); }
@@ -163,49 +165,7 @@ public abstract class AbstractAPI<T> {
 
     protected GenericUrl buildUrl(String suffixUrl) { return new GenericUrl(this.clientAclAPI.getBaseUrl() + suffixUrl); }
 
-    protected AclAPIRoot<T> get(String suffixUrl) throws AclAPIException {
-        try {
-            GenericUrl url = this.buildUrl(suffixUrl);
-            HttpRequest request = this.requestFactory.buildGetRequest(url);
-            HttpResponse response = request.execute();
-            return this.parse(response.parseAsString(), getType());
-        } catch (IOException e) {
-            throw new AclAPIException("IO Error during GET request: " + e, e);
-        }
-    }
-
-    protected AclAPIRoot<T> post(String suffixUrl, Object payload) throws AclAPIException {
-        try {
-            GenericUrl url = this.buildUrl(suffixUrl);
-            JsonHttpContent content = null;
-            if (payload != null) {
-                content = new JsonHttpContent(JSON_FACTORY, payload);
-            }
-            HttpRequest request = this.requestFactory.buildPostRequest(url, content);
-            HttpResponse response = request.execute();
-            return this.parse(response.parseAsString(), getType());
-        } catch (IOException e) {
-            throw new AclAPIException("IO Error during POST request: " + e, e);
-        }
-    }
-
-    protected <T extends GenericJson> T post(String suffixUrl, Object payload, Class<T> type) throws AclAPIException {
-        try {
-            GenericUrl url = this.buildUrl(suffixUrl);
-            JsonHttpContent content = null;
-            if (payload != null) {
-                content = new JsonHttpContent(JSON_FACTORY, payload);
-            }
-            HttpRequest request = this.requestFactory.buildPostRequest(url, content);
-            HttpResponse response = request.execute();
-            return this.parse(response.parseAsString(), type);
-
-        } catch (IOException e) {
-            throw new AclAPIException("IO Error during POST request: " + e, e);
-        }
-    }
-
-    protected <T extends GenericJson> T put(String suffixUrl, Object payload, Class<T> type) throws AclAPIException {
+    protected <T extends GenericJson> T put(String suffixUrl, Object payload, Map<String, String> headers, Class<T> type) throws AclAPIException {
         try {
             GenericUrl url = this.buildUrl(suffixUrl);
             JsonHttpContent content = null;
@@ -213,44 +173,27 @@ public abstract class AbstractAPI<T> {
                 content = new JsonHttpContent(JSON_FACTORY, payload);
             }
             HttpRequest request = this.requestFactory.buildPutRequest(url, content);
-            HttpResponse response = request.execute();
-            return this.parse(response.parseAsString(), type);
-        } catch (IOException e) {
-            throw new AclAPIException("IO Error during PUT request: " + e, e);
-        }
-    }
-
-    protected AclAPIRoot<T> put(String suffixUrl, Object payload) throws AclAPIException {
-        try {
-            GenericUrl url = this.buildUrl(suffixUrl);
-            JsonHttpContent content = null;
-            if (payload != null) {
-                content = new JsonHttpContent(JSON_FACTORY, payload);
+            HttpHeaders httpHeaders = createHeaders(headers);
+            if(httpHeaders != null) {
+                request.setHeaders(httpHeaders);
             }
-            HttpRequest request = this.requestFactory.buildPutRequest(url, content);
             HttpResponse response = request.execute();
-            return this.parse(response.parseAsString(), getType());
+            return parse(response.parseAsString(), type);
         } catch (IOException e) {
             throw new AclAPIException("IO Error during PUT request: " + e, e);
         }
     }
 
-    protected AclAPIRoot<T> delete(String suffixUrl) throws AclAPIException {
+    protected <T extends GenericJson> T delete(String suffixUrl, Map<String, String> headers, Class<T> type) throws AclAPIException {
         try {
             GenericUrl url = this.buildUrl(suffixUrl);
             HttpRequest request = this.requestFactory.buildDeleteRequest(url);
+            HttpHeaders httpHeaders = createHeaders(headers);
+            if(httpHeaders != null) {
+                request.setHeaders(httpHeaders);
+            }
             HttpResponse response = request.execute();
-            return this.parse(response.parseAsString(), getType());
-        } catch (IOException e) {
-            throw new AclAPIException("IO Error during DELETE request: " + e, e);
-        }
-    }
-    protected <T extends GenericJson> T delete(String suffixUrl, Class<T> type) throws AclAPIException {
-        try {
-            GenericUrl url = this.buildUrl(suffixUrl);
-            HttpRequest request = this.requestFactory.buildDeleteRequest(url);
-            HttpResponse response = request.execute();
-            return this.parse(response.parseAsString(), type);
+            return parse(response.parseAsString(), type);
         } catch (IOException e) {
             throw new AclAPIException("IO Error during DELETE request: " + e, e);
         }
@@ -272,8 +215,18 @@ public abstract class AbstractAPI<T> {
         }
     }
 
-    public static <T extends GenericJson> T parse(String output, Class<T> dataType) throws IOException {
+    private HttpHeaders createHeaders(Map<String, String> headers) {
+        if(headers != null) {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            for (String key : headers.keySet()) {
+                httpHeaders.set(key, headers.get(key));
+            }
+            return httpHeaders;
+        }
+        return null;
+    }
 
+    public static <T extends GenericJson> T parse(String output, Class<T> dataType) throws IOException {
         InputStream stream = new ByteArrayInputStream(output.getBytes(DEFAULT_CHARSET));
 
         com.google.api.client.json.JsonFactory jsonFactory = new JacksonFactory();

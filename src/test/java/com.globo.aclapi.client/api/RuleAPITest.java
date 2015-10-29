@@ -103,7 +103,7 @@ public class RuleAPITest extends TestCase {
 
         Rule rule = new Rule();
 
-        Rule.RuleSaveResponse response = this.ruleAPI.save(123l, 97l, rule);
+        Rule.RuleSaveResponse response = this.ruleAPI.save(123l, 97l, rule, null);
 
         assertEquals((Long)1241l, response.getFirstRuleId());
         assertEquals((Long)372l, response.getJobId());

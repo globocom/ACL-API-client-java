@@ -27,6 +27,8 @@ import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Trace;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +68,7 @@ public class RuleAPI extends AbstractAPI<Rule> {
         Rule.RuleRequest request = new Rule.RuleRequest();
         request.addRule(rule);
 
-        Rule.RuleSaveResponse result = this.put("/api/ipv4/acl/" + envId, request, Rule.RuleSaveResponse.class);
+        Rule.RuleSaveResponse result = this.put("/api/ipv4/acl/" + envId, request, null, Rule.RuleSaveResponse.class);
         rule.setId(result.getFirstRuleId().toString());
 
         return result;
@@ -78,7 +80,7 @@ public class RuleAPI extends AbstractAPI<Rule> {
      * @return RuleSaveResponse with jobId and ruleId
      */
     @Trace(dispatcher = true)
-    public Rule.RuleSaveResponse save(Long envId, Long numVlan, Rule rule){
+    public Rule.RuleSaveResponse save(Long envId, Long numVlan, Rule rule, String owner){
         NewRelic.setTransactionName(null, "/globoACL/rule/saveByEnvAndNumVlan");
 
         LOGGER.info("[ACL_API] removing rule: "+ rule + ", envId: " + envId + ", numVlan: " + numVlan + ". "+ this.getUserCredentials());
@@ -86,7 +88,10 @@ public class RuleAPI extends AbstractAPI<Rule> {
         Rule.RuleRequest request = new Rule.RuleRequest();
         request.addRule(rule);
 
-        Rule.RuleSaveResponse result = this.put("/api/ipv4/acl/" + envId + "/" + numVlan, request, Rule.RuleSaveResponse.class);
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("X-Owner-Assigned", owner);
+
+        Rule.RuleSaveResponse result = this.put("/api/ipv4/acl/" + envId + "/" + numVlan, request, headers, Rule.RuleSaveResponse.class);
         rule.setId(result.getFirstRuleId().toString());
 
         return result;
@@ -98,9 +103,9 @@ public class RuleAPI extends AbstractAPI<Rule> {
      * @return rule object with id
      */
     @Trace(dispatcher = true)
-    public Rule saveSync(Long envId, Long numVlan, Rule rule) {
+    public Rule saveSync(Long envId, Long numVlan, Rule rule, String owner) {
         NewRelic.setTransactionName(null, "/globoACL/rule/saveSync");
-        Rule.RuleSaveResponse result = save(envId, numVlan, rule);
+        Rule.RuleSaveResponse result = save(envId, numVlan, rule, owner);
 
         JobAPI jobApi = this.getClientAclAPI().getJobAPI();
         Job job = jobApi.get(result.getJobId());
@@ -110,7 +115,7 @@ public class RuleAPI extends AbstractAPI<Rule> {
             try {
                 jobApi.run(result.getJobId());
             } catch (AclErrorCodeAPIException ex) {
-                remove(envId, numVlan, result.getFirstRuleId());
+                remove(envId, numVlan, result.getFirstRuleId(), owner);
                 throw ex;
             }
         }
@@ -124,20 +129,23 @@ public class RuleAPI extends AbstractAPI<Rule> {
      * @return jobId
      */
     @Trace(dispatcher = true)
-    public Long remove(Long envId, Long numVlan, Long ruleId) {
+    public Long remove(Long envId, Long numVlan, Long ruleId, String owner) {
         NewRelic.setTransactionName(null, "/globoACL/rule/remove");
         LOGGER.info("[ACL_API] removing rule: "+ruleId + ", envId: " + envId + ", numVlan: " + numVlan + ". "+ this.getUserCredentials());
 
-        GenericJson result = this.delete("/api/ipv4/acl/" + envId + "/" + numVlan + "/" + ruleId, GenericJson.class);
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("X-Owner-Assigned", owner);
+
+        GenericJson result = this.delete("/api/ipv4/acl/" + envId + "/" + numVlan + "/" + ruleId, headers, GenericJson.class);
 
         return ((BigDecimal)result.get("job")).longValue();
     }
 
     @Trace(dispatcher = true)
-    public void removeSync(Long envId, Long numVlan, Long ruleId) {
+    public void removeSync(Long envId, Long numVlan, Long ruleId, String owner) {
         NewRelic.setTransactionName(null, "/globoACL/rule/removeSync");
 
-        Long jobId = remove(envId, numVlan, ruleId);
+        Long jobId = remove(envId, numVlan, ruleId, owner);
 
         JobAPI jobAPI = this.getClientAclAPI().getJobAPI();
 
