@@ -59,23 +59,26 @@ import java.net.ProxySelector;
 public class ClientAclAPI {
     static final Logger LOGGER = LoggerFactory.getLogger(ClientAclAPI.class);
 
+    private static final int DEFAULT_TIMEOUT = 5000;
     private final HttpTransport httpTransport;
     private String baseUrl;
     private String username;
     private String password;
     private String token;
 
+
     protected ClientAclAPI(HttpTransport httpTransport) { this.httpTransport = httpTransport; }
 
-    public static ClientAclAPI buildHttpAPI(String baseUrl, String username, String password) {
-        ClientAclAPI clientAclAPI = new ClientAclAPI(getTransport());
+    public static ClientAclAPI buildHttpAPI(String baseUrl, String username, String password, int timeout, boolean verifySSL) {
+        ClientAclAPI clientAclAPI = new ClientAclAPI(getTransport(timeout, verifySSL));
         clientAclAPI.setBaseUrl(baseUrl);
         clientAclAPI.setUsername(username);
         clientAclAPI.setPassword(password);
         return clientAclAPI;
     }
+
     public static ClientAclAPI buildHttpAPI(String baseUrl, String token) {
-        ClientAclAPI clientAclAPI = new ClientAclAPI(getTransport());
+        ClientAclAPI clientAclAPI = new ClientAclAPI(getTransport(DEFAULT_TIMEOUT, true));
         clientAclAPI.setBaseUrl(baseUrl);
         clientAclAPI.setToken(token);
         return clientAclAPI;
@@ -109,40 +112,41 @@ public class ClientAclAPI {
         this.password = password;
     }
 
-    private static ApacheHttpTransport getTransport() throws RuntimeException {
+    private static ApacheHttpTransport getTransport(int timeout, boolean verifySSL) throws RuntimeException {
+        if (verifySSL) {
+            return new ApacheHttpTransport(newDefaultHttpClient(SSLSocketFactory.getSocketFactory(), getHttpParams(timeout), ProxySelector.getDefault()));
 
+        }else {
+            try {
+                SSLContext ctx = SSLContext.getInstance("SSL");
+                X509TrustManager tm = new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
 
-        try {
-            //@TODO verificar com o daniel a utilização desse context
-            SSLContext ctx = SSLContext.getInstance("SSL");
-            X509TrustManager tm = new X509TrustManager() {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    }
 
-                @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    }
+                };
 
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-            };
+                ctx.init(null, new TrustManager[]{tm}, null);
+                SSLSocketFactory ssf = new SSLSocketFactory(ctx);
+                return new ApacheHttpTransport(newDefaultHttpClient(ssf, getHttpParams(timeout), ProxySelector.getDefault()));
 
-            ctx.init(null, new TrustManager[]{tm}, null);
-            SSLSocketFactory ssf = new SSLSocketFactory(ctx);
-
-//            return new ApacheHttpTransport(newDefaultHttpClient(SSLSocketFactory.getSocketFactory(), getHttpParams(), ProxySelector.getDefault()));
-            return new ApacheHttpTransport(newDefaultHttpClient(ssf, getHttpParams(), ProxySelector.getDefault()));
-        }catch (Exception e ){
-            throw new RuntimeException("ERRO ssl schema", e);
+            } catch (Exception e) {
+                throw new RuntimeException("ERRO ssl schema", e);
+            }
         }
     }
 
-    private static HttpParams getHttpParams() {
+    private static HttpParams getHttpParams(int timeout) {
         HttpParams params = new BasicHttpParams();
         HttpConnectionParams.setSocketBufferSize(params, 8192);
-        HttpConnectionParams.setConnectionTimeout(params, 5000);
+        HttpConnectionParams.setConnectionTimeout(params, timeout);
         ConnManagerParams.setMaxTotalConnections(params, 200);
         ConnManagerParams.setMaxConnectionsPerRoute(params, new ConnPerRouteBean(20));
         return params;

@@ -14,7 +14,7 @@ public class ClientAclAPITest {
 
     @Test
     public void testGetHttpParams() {
-        ClientAclAPI clientAclAPI = ClientAclAPI.buildHttpAPI("api_url", "api_user", "api_password");
+        ClientAclAPI clientAclAPI = ClientAclAPI.buildHttpAPI("api_url", "api_user", "api_password", 5000, false);
 
         assertEquals("api_url", clientAclAPI.getBaseUrl());
         assertEquals("api_user", clientAclAPI.getUsername());
