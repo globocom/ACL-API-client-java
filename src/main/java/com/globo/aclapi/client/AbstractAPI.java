@@ -173,10 +173,9 @@ public abstract class AbstractAPI<T> {
                 content = new JsonHttpContent(JSON_FACTORY, payload);
             }
             HttpRequest request = this.requestFactory.buildPutRequest(url, content);
-            HttpHeaders httpHeaders = createHeaders(headers);
-            if(httpHeaders != null) {
-                request.setHeaders(httpHeaders);
-            }
+            createHeaders(request, headers);
+
+
             HttpResponse response = request.execute();
             return parse(response.parseAsString(), type);
         } catch (IOException e) {
@@ -188,10 +187,8 @@ public abstract class AbstractAPI<T> {
         try {
             GenericUrl url = this.buildUrl(suffixUrl);
             HttpRequest request = this.requestFactory.buildDeleteRequest(url);
-            HttpHeaders httpHeaders = createHeaders(headers);
-            if(httpHeaders != null) {
-                request.setHeaders(httpHeaders);
-            }
+            createHeaders(request, headers);
+
             HttpResponse response = request.execute();
             return parse(response.parseAsString(), type);
         } catch (IOException e) {
@@ -215,15 +212,13 @@ public abstract class AbstractAPI<T> {
         }
     }
 
-    private HttpHeaders createHeaders(Map<String, String> headers) {
+    private void createHeaders(HttpRequest request, Map<String, String> headers) {
         if(headers != null) {
-            HttpHeaders httpHeaders = new HttpHeaders();
+            HttpHeaders httpHeaders = request.getHeaders();
             for (String key : headers.keySet()) {
                 httpHeaders.set(key, headers.get(key));
             }
-            return httpHeaders;
         }
-        return null;
     }
 
     public static <T extends GenericJson> T parse(String output, Class<T> dataType) throws IOException {
