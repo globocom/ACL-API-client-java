@@ -83,7 +83,7 @@ public class RuleAPI extends AbstractAPI<Rule> {
     public Rule.RuleSaveResponse save(Long envId, Long numVlan, Rule rule, String owner){
         NewRelic.setTransactionName(null, "/globoACL/rule/saveByEnvAndNumVlan");
 
-        LOGGER.info("[ACL_API] removing rule: "+ rule + ", envId: " + envId + ", numVlan: " + numVlan + ". "+ this.getUserCredentials());
+        LOGGER.info("[ACL_API] updating rule: "+ rule + ", envId: " + envId + ", numVlan: " + numVlan + ". "+ this.getUserCredentials());
 
         Rule.RuleRequest request = new Rule.RuleRequest();
         request.addRule(rule);
