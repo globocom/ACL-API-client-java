@@ -83,6 +83,10 @@ public abstract class AbstractAPI<T> {
                         return false;
                     }
                 });
+
+                request.setConnectTimeout(AbstractAPI.this.clientAclAPI.getTimeout());
+                request.setReadTimeout(AbstractAPI.this.clientAclAPI.getTimeout());
+
                 request.setResponseInterceptor(new HttpResponseInterceptor() {
                     @Override
                     public void interceptResponse(HttpResponse response) throws IOException {
@@ -200,6 +204,7 @@ public abstract class AbstractAPI<T> {
         try {
             GenericUrl url = this.buildUrl(suffixUrl);
             HttpRequest request = this.requestFactory.buildGetRequest(url);
+
             HttpResponse response = request.execute();
 
             if ( response.getStatusCode()/100 == 2) {

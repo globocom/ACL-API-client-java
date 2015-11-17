@@ -59,13 +59,14 @@ import java.net.ProxySelector;
 public class ClientAclAPI {
     static final Logger LOGGER = LoggerFactory.getLogger(ClientAclAPI.class);
 
-    private static final int DEFAULT_TIMEOUT = 5000;
+
     private final HttpTransport httpTransport;
     private String baseUrl;
     private String username;
     private String password;
     private String token;
 
+    private int timeout;
 
     protected ClientAclAPI(HttpTransport httpTransport) { this.httpTransport = httpTransport; }
 
@@ -74,13 +75,7 @@ public class ClientAclAPI {
         clientAclAPI.setBaseUrl(baseUrl);
         clientAclAPI.setUsername(username);
         clientAclAPI.setPassword(password);
-        return clientAclAPI;
-    }
-
-    public static ClientAclAPI buildHttpAPI(String baseUrl, String token) {
-        ClientAclAPI clientAclAPI = new ClientAclAPI(getTransport(DEFAULT_TIMEOUT, true));
-        clientAclAPI.setBaseUrl(baseUrl);
-        clientAclAPI.setToken(token);
+        clientAclAPI.setTimeout(timeout);
         return clientAclAPI;
     }
 
@@ -147,6 +142,7 @@ public class ClientAclAPI {
         HttpParams params = new BasicHttpParams();
         HttpConnectionParams.setSocketBufferSize(params, 8192);
         HttpConnectionParams.setConnectionTimeout(params, timeout);
+        ConnManagerParams.setTimeout(params, timeout);
         ConnManagerParams.setMaxTotalConnections(params, 200);
         ConnManagerParams.setMaxConnectionsPerRoute(params, new ConnPerRouteBean(20));
         return params;
@@ -179,8 +175,6 @@ public class ClientAclAPI {
         httpClient.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
         httpClient.setRoutePlanner(new ProxySelectorRoutePlanner(registry, proxySelector));
 
-
-
         return httpClient;
     }
 
@@ -195,5 +189,14 @@ public class ClientAclAPI {
 
     public JobAPI getJobAPI() {
         return new JobAPI(this);
+    }
+
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 }
