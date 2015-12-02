@@ -133,9 +133,9 @@ public abstract class AbstractAPI<T> {
             AclAPIRoot<ErrorMessage> responseObj = this.parse(responseAsString, ErrorMessage.class);
             ErrorMessage errorMsg = responseObj.getFirstObject();
             if (errorMsg != null && errorMsg.getCode() != null && errorMsg.getMsg() != null) {
-                throw new AclErrorCodeAPIException(errorMsg.getCode(), errorMsg.getMsg());
+                throw new AclErrorCodeAPIException(errorMsg.getCode(), errorMsg.getMsg(), statusCode);
             } else {
-                throw new AclAPIException(responseAsString);
+                throw new AclAPIException(responseAsString, statusCode);
             }
         } else {
             throw new AclAPIException(response.parseAsString());

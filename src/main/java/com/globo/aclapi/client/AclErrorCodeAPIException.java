@@ -11,22 +11,12 @@ public class AclErrorCodeAPIException  extends AclAPIException {
 
     private String description;
 
-    public AclErrorCodeAPIException(String code, String description) {
+    public AclErrorCodeAPIException(String code, String description, Integer httpStatus) {
         super(code + ":" + description);
         this.code = Integer.valueOf(code);
         this.description = description;
+        this.httpStatus = httpStatus;
     }
-
-    public AclErrorCodeAPIException(int code, String description, Throwable e) {
-        super(code + ":" + description, e);
-        this.code = code;
-        this.description = description;
-    }
-
-    public AclErrorCodeAPIException(String description ) {
-        super(description);
-    }
-
 
     public int getCode() {
         return code;
