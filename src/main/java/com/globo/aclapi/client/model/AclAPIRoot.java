@@ -15,7 +15,7 @@ public class AclAPIRoot<T> extends GenericJson {
 
     public void setObjectList(List<T> objectList) { this.objectList = objectList; }
 
-    /**
+    /*
      * Return first object in list or <code>null</code> if list is empty
      * @return
      */

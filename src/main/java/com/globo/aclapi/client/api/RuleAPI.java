@@ -45,7 +45,7 @@ public class RuleAPI extends AbstractAPI<Rule> {
         return new TypeReference<Rule>() {}.getType();
     }
 
-    /**
+    /*
      * https://gitlab.globoi.com/supseg/acl_api/wikis/get-api-ipv46-acl-environment
      *
      */
@@ -57,7 +57,7 @@ public class RuleAPI extends AbstractAPI<Rule> {
         return aclResponse.getRules();
     }
 
-    /**
+    /*
      * https://gitlab.globoi.com/supseg/acl_api/wikis/put-api-ipv46-acl-environment
      *
      * @return RuleSaveResponse with jobId and ruleId
@@ -74,7 +74,7 @@ public class RuleAPI extends AbstractAPI<Rule> {
         return result;
     }
 
-    /**
+    /*
      * https://gitlab.globoi.com/supseg/acl_api/wikis/put-api-ipv46-acl-environment-num_vlan
      *
      * @return RuleSaveResponse with jobId and ruleId
@@ -97,7 +97,7 @@ public class RuleAPI extends AbstractAPI<Rule> {
         return result;
     }
 
-    /**
+    /*
      * save the rule in ACL-API and force run the job, if the job fails, remove the rule and throw exception with jobs message
      *
      * @return rule object with id
@@ -123,7 +123,7 @@ public class RuleAPI extends AbstractAPI<Rule> {
         return rule;
     }
 
-    /**
+    /*
      * https://gitlab.globoi.com/supseg/acl_api/wikis/delete-api-ipv46-acl-environment-num_vlan-id
      *
      * @return jobId
